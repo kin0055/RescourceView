@@ -3,7 +3,7 @@ var Gantt = function() {
     this.data = [];
 
     this.options = {
-        container: "#gantt-chart",
+        container: "#rescource-chart",
         showWeekends: true,
         showToday: true,
         allowMoves: true,

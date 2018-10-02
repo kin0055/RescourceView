@@ -6,7 +6,7 @@ use Kanboard\Core\Plugin\Base;
 use Kanboard\Core\Security\Role;
 use Kanboard\Core\Translator;
 
-use Kanboard\Plugin\Gantt\Formatter\RescourceViewFormatter;
+use Kanboard\Plugin\RescourceView\Formatter\RescourceViewFormatter;
 
 class Plugin extends Base
 {
@@ -18,9 +18,9 @@ class Plugin extends Base
         $this->template->hook->attach('template:project-header:view-switcher', 'RescourceView:project_header/views');
         $this->template->hook->attach('template:project:dropdown', 'RescourceView:project/dropdown');
 
-        $this->hook->on('template:layout:js', array('template' => 'plugins/Gantt/Assets/Reschart.js'));
-        $this->hook->on('template:layout:js', array('template' => 'plugins/Gantt/Assets/Rescource.js'));
-        $this->hook->on('template:layout:css', array('template' => 'plugins/Gantt/Assets/gantt.css'));
+        $this->hook->on('template:layout:js', array('template' => 'plugins/RescourceView/Assets/Reschart.js'));
+        $this->hook->on('template:layout:js', array('template' => 'plugins/RescourceView/Assets/Rescource.js'));
+        $this->hook->on('template:layout:css', array('template' => 'plugins/RescourceView/Assets/gantt.css'));
 
         $this->container['RescourceViewFormatter'] = $this->container->factory(function ($c) {
             return new RescourceViewFormatter($c);

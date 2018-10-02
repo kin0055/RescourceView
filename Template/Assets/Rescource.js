@@ -10,10 +10,10 @@ KB.on('dom.ready', function () {
     }
 
     KB.onKey('v+g', function () {
-        goToLink('a.view-gantt');
+        goToLink('a.view-Rescource');
     });
 
-    if (KB.exists('#gantt-chart')) {
+    if (KB.exists('#rescource-chart')) {
         var chart = new Gantt();
         chart.show();
 

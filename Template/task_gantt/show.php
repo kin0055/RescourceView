@@ -1,24 +1,21 @@
 <section id="main">
-    <?= $this->projectHeader->render($project, 'TaskGanttController', 'show', false, 'Gantt') ?>
+    <?= $this->projectHeader->render($project, 'RescourceViewController', 'show', false, 'RescourceView') ?>
     <div class="menu-inline">
         <ul>
-            <li <?= $sorting === 'board' ? 'class="active"' : '' ?>>
-                <?= $this->url->icon('sort-numeric-asc', t('Sort by position'), 'TaskGanttController', 'show', array('project_id' => $project['id'], 'sorting' => 'board', 'plugin' => 'Gantt')) ?>
+            <li <?= $sorting === 'Assignee' ? 'class="active"' : '' ?>>
+                <?= $this->url->icon('sort-numeric-asc', t('Sort by Assignee'), 'RescourceViewController', 'show', array('project_id' => $project['id'], 'sorting' => 'Assignee', 'plugin' => 'RescourceView')) ?>
             </li>
-            <li <?= $sorting === 'date' ? 'class="active"' : '' ?>>
-                <?= $this->url->icon('sort-amount-asc', t('Sort by date'), 'TaskGanttController', 'show', array('project_id' => $project['id'], 'sorting' => 'date', 'plugin' => 'Gantt')) ?>
-            </li>
-            <li>
-                <?= $this->modal->large('plus', t('Add task'), 'TaskCreationController', 'show', array('project_id' => $project['id'])) ?>
+            <li <?= $sorting === 'idle' ? 'class="active"' : '' ?>>
+                <?= $this->url->icon('sort-amount-asc', t('Sort by idle-status'), 'RescourceViewController', 'show', array('project_id' => $project['id'], 'sorting' => 'idle', 'plugin' => 'RescourceView')) ?>
             </li>
         </ul>
     </div>
 
     <?php if (! empty($tasks)): ?>
         <div
-            id="gantt-chart"
+            id="rescource-chart"
             data-records='<?= json_encode($tasks, JSON_HEX_APOS) ?>'
-            data-save-url="<?= $this->url->href('TaskGanttController', 'save', array('project_id' => $project['id'], 'plugin' => 'Gantt')) ?>"
+            data-save-url="<?= $this->url->href('RescourceViewController', 'save', array('project_id' => $project['id'], 'plugin' => 'RescourceView')) ?>"
             data-label-start-date="<?= t('Start date:') ?>"
             data-label-end-date="<?= t('Due date:') ?>"
             data-label-assignee="<?= t('Assignee:') ?>"
