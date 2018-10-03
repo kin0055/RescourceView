@@ -9,13 +9,13 @@ KB.on('dom.ready', function () {
         }
     }
 
-    KB.onKey('v+g', function () {
+    KB.onKey('r+s', function () {
         goToLink('a.view-Rescource');
     });
 
     if (KB.exists('#rescource-chart')) {
-        var chart = new Gantt();
-        chart.show();
+        var reschart = new Reschart();
+        reschart.show();
 
         KB.tooltip();
     }
