@@ -1,6 +1,10 @@
 // Based on jQuery.ganttView v.0.8.8 Copyright (c) 2010 JC Grubbs - jc.grubbs@devmynd.com - MIT License
 var Reschart = function() {
     this.data = [];
+    this.user = [];
+    this.userout = [];
+
+    this.notaskusers = 0;
 
     this.options = {
         container: "#rescource-chart",
@@ -30,7 +34,9 @@ Reschart.prototype.saveRecord = function(record) {
 // Build the Gantt chart
 Reschart.prototype.show = function() {
     this.data = this.prepareData($(this.options.container).data('records'));
-
+    this.user = this.prepareUser($(this.options.container).data('members'));
+    this.userout = this.prepareCounter($(this.options.container).data('members'));
+    
     var minDays = Math.floor((this.options.slideWidth / this.options.cellWidth) + 5);
     var range = this.getDateRange(minDays);
     var startDate = range[0];
@@ -69,23 +75,53 @@ Reschart.prototype.renderVerticalHeader = function() {
     var itemDiv = jQuery("<div>", { "class": "ganttview-vtheader-item" });
     var seriesDiv = jQuery("<div>", { "class": "ganttview-vtheader-series" });
 
-    for (var i = 0; i < this.data.length; i++) {
-        var content = jQuery("<span>")
-            .append(this.infoTooltip(this.getVerticalHeaderTooltip(this.data[i])))
-            .append("&nbsp;");
+    //append no task users
+    var count = 0;
+    $.each(this.user, function(i, n){
+        if(n == 0){
 
-        if (this.data[i].type == "task") {
-            content.append(jQuery('<strong>').text('#'+this.data[i].id+' '));
-            content.append(jQuery("<a>", {"href": this.data[i].link, "title": this.data[i].title}).text(this.data[i].title));
+            count++;
+
+            var content = jQuery("<span>");
+            content.append(jQuery("<a>", {"title": "Assignee"}).append('<i class="fa fa-user"></i>')).append("&nbsp;");
+            content.append(jQuery("<a>").text(i)).append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+
+            content.append(jQuery("<a>", {"title": "No Working Task"}).append('<i class="fa fa-calendar-times-o"></i>')).append("&nbsp;");
+            content.append(jQuery('<a>',{"title":"No Working Task"}).text('No Job'));
+    
+            seriesDiv.append(jQuery("<div>", {"class": "ganttview-vtheader-series-name"}).append(content));
         }
-        else {
-            content
-                .append(jQuery("<a>", {"href": this.data[i].board_link, "title": $(this.options.container).data("label-board-link")}).append('<i class="fa fa-th"></i>'))
-                .append("&nbsp;")
-                .append(jQuery("<a>", {"href": this.data[i].gantt_link, "title": $(this.options.container).data("label-gantt-link")}).append('<i class="fa fa-sliders"></i>'))
-                .append("&nbsp;")
-                .append(jQuery("<a>", {"href": this.data[i].link}).text(this.data[i].title));
+    });
+
+    this.notaskusers = count;
+
+    //append tasks with users
+    for (var i = 0; i < this.data.length; i++) {
+
+        var content = jQuery("<span>");
+
+        //first time
+        if(this.userout[this.data[i].assignee] == 0){
+            content.append(jQuery("<a>", {"title": "Assignee"}).append('<i class="fa fa-user"></i>')).append("&nbsp;");
+        }else{
+            content.append(jQuery("<a>", {"title": "Plan"}).append('<i class="fa fa-chevron-right"></i>')).append("&nbsp;");
         }
+
+        this.userout[this.data[i].assignee]++;
+            
+        content.append(jQuery("<a>").text(this.data[i].assignee)).append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+        
+        //task total status
+        content.append(jQuery("<a>", {"title": "Total status"}).append('<i class="fa fa-calendar-plus-o"></i>')).append("&nbsp;");
+
+        content.append(jQuery('<strong>').text('[ ' + this.userout[this.data[i].assignee] + ' / ' + this.user[this.data[i].assignee] + ' ]')).append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+
+        //target task info
+        content.append(jQuery("<a>", {"title": "Task ID"}).append('<i class="fa fa-tasks"></i>')).append("&nbsp;");
+
+        content.append(jQuery('<a>',{"href": this.data[i].link, "title": this.data[i].title}).text('#'+this.data[i].id+' ')).append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+
+        content.append(this.infoTooltip(this.getVerticalHeaderTooltip(this.data[i]))).append("&nbsp;");
 
         seriesDiv.append(jQuery("<div>", {"class": "ganttview-vtheader-series-name"}).append(content));
     }
@@ -162,7 +198,7 @@ Reschart.prototype.renderGrid = function(dates) {
     rowDiv.css("width", w + "px");
     gridDiv.css("width", w + "px");
 
-    for (var i = 0; i < this.data.length; i++) {
+    for (var i = 0; i < (this.data.length + this.notaskusers); i++) {
         gridDiv.append(rowDiv.clone());
     }
 
@@ -173,7 +209,7 @@ Reschart.prototype.renderGrid = function(dates) {
 Reschart.prototype.addBlockContainers = function() {
     var blocksDiv = jQuery("<div>", { "class": "ganttview-blocks" });
 
-    for (var i = 0; i < this.data.length; i++) {
+    for (var i = 0; i < (this.data.length + this.notaskusers); i++) {
         blocksDiv.append(jQuery("<div>", { "class": "ganttview-block-container" }));
     }
 
@@ -184,6 +220,8 @@ Reschart.prototype.addBlockContainers = function() {
 Reschart.prototype.addBlocks = function(slider, start) {
     var rows = jQuery("div.ganttview-blocks div.ganttview-block-container", slider);
     var rowIdx = 0;
+
+    rowIdx = this.notaskusers;
 
     for (var i = 0; i < this.data.length; i++) {
         var series = this.data[i];
@@ -433,6 +471,31 @@ Reschart.prototype.prepareData = function(data) {
 
     return data;
 };
+
+// Convert user to local object
+Reschart.prototype.prepareUser = function(data) {
+
+    var usertmp = {};
+
+    $.each(data, function(i, n){
+        usertmp[i] = n;
+    });
+    
+    return usertmp;
+};
+
+// create user count object
+Reschart.prototype.prepareCounter = function(data) {
+
+    var usertmp = {};
+
+    $.each(data, function(i, n){
+        usertmp[i] = 0;
+    });
+    
+    return usertmp;
+};
+
 
 // Get the start and end date from the data provided
 Reschart.prototype.getDateRange = function(minDays) {

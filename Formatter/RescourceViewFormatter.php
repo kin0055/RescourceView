@@ -32,7 +32,11 @@ class RescourceViewFormatter extends BaseFormatter implements FormatterInterface
         $bars = array();
 
         foreach ($this->query->findAll() as $task) {
-            $bars[] = $this->formatTask($task);
+
+            /*ignore tasks with no assignee*/
+            if((!empty($task['assignee_name'])) || (!empty($task['assignee_username']))){
+                $bars[] = $this->formatTask($task);
+            }
         }
 
         return $bars;

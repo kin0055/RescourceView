@@ -23,15 +23,31 @@ class RescourceViewController extends BaseController
         $project = $this->getProject();
         $search = $this->helper->projectHeader->getSearchQuery($project);
         $sorting = $this->request->getStringParam('sorting', '');
-        $filter = $this->taskLexer->build($search)->withFilter(new TaskProjectFilter($project['id']));
 
         /**
         *   Assignee - ID first ; idle - less work first
         */
-        if ($sorting === 'Assignee') {
-            $filter->getQuery()->asc(TaskModel::TABLE.'.date_started')->asc(TaskModel::TABLE.'.date_creation');
-        } else {
-            $filter->getQuery()->asc('column_position')->asc(TaskModel::TABLE.'.position');
+        /*get user list first*/
+        $members = $this->projectUserRoleModel->getAssignableUsers($project['id']);
+        //$members = $this->projectUserRoleModel->getAssignableUsersList($project['id'], true, false, false);
+
+        $memblist = array();
+        foreach ($members as $id => $name) {
+            $memblist[$name] = 0;
+        }
+
+        /*get task data*/
+        $filter = $this->taskLexer->build($search)->withFilter(new TaskProjectFilter($project['id']));
+        
+        $filter->getQuery()->asc(TaskModel::TABLE.'.owner_id')->asc(TaskModel::TABLE.'.date_due');
+
+        $tasklist = $filter->format($this->RescourceViewFormatter);
+
+        /*count assignee's tasks*/
+        foreach ($tasklist as $task) {
+            if(!empty($task['assignee'])){
+                $memblist[$task['assignee']]++;
+            }
         }
 
         $this->response->html($this->helper->layout->app('RescourceView:res_view/show', array(
@@ -39,7 +55,8 @@ class RescourceViewController extends BaseController
             'title' => $project['name'],
             'description' => $this->helper->projectHeader->getDescription($project),
             'sorting' => $sorting,
-            'tasks' => $filter->format($this->RescourceViewFormatter),
+            'members' => $memblist,
+            'tasks' => $tasklist,
         )));
     }
 
