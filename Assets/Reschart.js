@@ -75,6 +75,8 @@ Reschart.prototype.renderVerticalHeader = function() {
     var itemDiv = jQuery("<div>", { "class": "ganttview-vtheader-item" });
     var seriesDiv = jQuery("<div>", { "class": "ganttview-vtheader-series" });
 
+    var assigneeLabel = $(this.options.container).data("label-no-job");
+
     //append no task users
     var count = 0;
     $.each(this.user, function(i, n){
@@ -87,7 +89,7 @@ Reschart.prototype.renderVerticalHeader = function() {
             content.append(jQuery("<a>").text(i)).append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
 
             content.append(jQuery("<a>", {"title": "No Working Task"}).append('<i class="fa fa-calendar-times-o"></i>')).append("&nbsp;");
-            content.append(jQuery('<a>',{"title":"No Working Task"}).text('No Job'));
+            content.append(jQuery('<strong>').text(assigneeLabel));
     
             seriesDiv.append(jQuery("<div>", {"class": "ganttview-vtheader-series-name"}).append(content));
         }
