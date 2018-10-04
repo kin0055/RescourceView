@@ -9,7 +9,7 @@ KB.on('dom.ready', function () {
         }
     }
 
-    KB.onKey('r+s', function () {
+    KB.onKey('v+s', function () {
         goToLink('a.view-Rescource');
     });
 
